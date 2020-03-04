@@ -1,28 +1,42 @@
-import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  OnDestroy
+} from "@angular/core";
+import { BalanceSubject } from "../balance";
+import { BehaviorSubject, Subscriber, Subscription } from "rxjs";
 
 @Component({
   selector: "app-balance",
   templateUrl: "./balance.component.html",
   styleUrls: ["./balance.component.css"]
 })
-export class BalanceComponent implements OnInit {
-  @Input()
+export class BalanceComponent implements OnInit, OnDestroy {
   balance = 0;
 
-  @Output()
-  balanceChanged = new EventEmitter();
-
+  subscriptions = new Subscription();
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscriptions.add(
+      BalanceSubject.subscribe(balance => {
+        this.balance = balance;
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
 
   add() {
-    this.balance += 10;
-    this.balanceChanged.emit(this.balance);
+    BalanceSubject.next(BalanceSubject.value + 10);
   }
 
   subtract() {
-    this.balance -= 10;
-    this.balanceChanged.emit(this.balance);
+    BalanceSubject.next(BalanceSubject.value - 10);
   }
 }
