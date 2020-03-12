@@ -1,13 +1,8 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  OnDestroy
-} from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { BalanceSubject } from "../balance";
-import { BehaviorSubject, Subscriber, Subscription } from "rxjs";
+import { Subscription } from "rxjs";
+import { Store } from "@ngrx/store";
+import { State } from "../reducers";
 
 @Component({
   selector: "app-balance",
@@ -18,13 +13,20 @@ export class BalanceComponent implements OnInit, OnDestroy {
   balance = 0;
 
   subscriptions = new Subscription();
-  constructor() {}
+  constructor(private store: Store<State>) {}
 
   ngOnInit() {
+    // this.subscriptions.add(
+    //   BalanceSubject.subscribe(balance => {
+    //     this.balance = balance;
+    //   })
+    // );
     this.subscriptions.add(
-      BalanceSubject.subscribe(balance => {
-        this.balance = balance;
-      })
+      this.store
+        .select(state => state.balance)
+        .subscribe(balance => {
+          this.balance = balance;
+        })
     );
   }
 
